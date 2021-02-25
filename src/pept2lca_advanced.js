@@ -5,7 +5,7 @@ const progress = require("cli-progress");
 const TAXA2LCA_OUTPUT = "intersection_lca.csv";
 
 async function performAction() {
-    await fs.writeFile(TAXA2LCA_OUTPUT, "peptide,filtered_taxa,lca,lca_name,lca_rank\n");
+    await fs.writeFile(TAXA2LCA_OUTPUT, "peptide,filtered_taxa,lca,lca_name,lca_rank,superkingdom_name,phylum_name,class_name,order_name,family_name,genus_name,species_name\n");
 
     const readTaxaPepts = await fs.readFile("/dev/stdin", { encoding: "utf-8" });
 
@@ -48,12 +48,18 @@ async function performAction() {
                 "http://api.unipept.ugent.be/api/v1/taxa2lca.json",
                 {
                     input: filteredTaxa
+                },
+                {
+                    params: {
+                        extra: true,
+                        names: true
+                    }
                 }
             );
 
-            await fs.appendFile(TAXA2LCA_OUTPUT, `${pept},${[...filteredTaxa].join(";")},${result.data.taxon_id},${result.data.taxon_name},${result.data.taxon_rank}\n`);
+            await fs.appendFile(TAXA2LCA_OUTPUT, `${pept},${[...filteredTaxa].join(";")},${result.data.taxon_id},${result.data.taxon_name},${result.data.taxon_rank},${result.data.superkingdom_name},${result.data.phylum_name},${result.data.class_name},${result.data.order_name},${result.data.family_name},${result.data.genus_name},${result.data.species_name}\n`);
         } else {
-            await fs.appendFile(TAXA2LCA_OUTPUT, `${pept},N/A,N/A,N/A,N/A\n`);
+            await fs.appendFile(TAXA2LCA_OUTPUT, `${pept},N/A,N/A,N/A,N/A,N/A,N/A,N/A,N/A,N/A,N/A,N/A\n`);
         }
 
         processed++;
